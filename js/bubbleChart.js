@@ -12,8 +12,7 @@ d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_data
     });
 
 function render(data) {
-    const chart = svg.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    const chart = createChartGroup(svg);
 
     // Create X Axis
     const xAxis = createXAxis();
@@ -24,18 +23,14 @@ function render(data) {
     appendYAxis(chart, yAxis);
 
     const rAxis = createRadiusAxis();
+    const bAxis = createColourAxis();
 
-    // Add bubbles
-    chart.selectAll("dot")
-        .data(data)
-        .enter()
-        .append("circle")
-        .attr("cx", (d) => xAxis(d.gdpPercap))
-        .attr("cy", (d) => yAxis(d.lifeExp))
-        .attr("r", (d) => rAxis(d.pop))
-        .style("fill", "#69b3a2")
-        .style("opacity", "0.7")
-        .attr("stroke", "black")
+    addDataPoints(data, chart, xAxis, yAxis, rAxis, bAxis)
+}
+
+function createChartGroup(svg) {
+    return svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 }
 
 function createXAxis() {
@@ -65,4 +60,24 @@ function createRadiusAxis() {
     return d3.scaleLinear()
         .domain([200000, 1310000000])
         .range([1, 40]);
+}
+
+function createColourAxis() {
+    return d3.scaleOrdinal()
+        .domain(["Asia", "Europe", "Americas", "Africa", "Oceania"])
+        .range(d3.schemeSet2);
+}
+
+function addDataPoints(data, chart, xAxis, yAxis, rAxis, bAxis) {
+    // Add bubbles
+    chart.selectAll("dot")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", (d) => xAxis(d.gdpPercap))
+        .attr("cy", (d) => yAxis(d.lifeExp))
+        .attr("r", (d) => rAxis(d.pop))
+        .style("fill", (d) => bAxis(d.continent))
+        .style("opacity", "0.7")
+        .attr("stroke", "black")
 }
